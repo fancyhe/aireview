@@ -1,0 +1,41 @@
+services:
+  open-webui:
+    container_name: "open-webui"
+    image: "ghcr.io/open-webui/open-webui:main"
+    ports:
+      - "3000:8080/tcp"
+    environment:
+      - "OPENAI_API_BASE_URL=http://${HOST_INTERNAL:-host.docker.internal}:9099"
+      - "OPENAI_API_KEY=0p3n-w3bu!"
+      - "OLLAMA_BASE_URL=http://${HOST_INTERNAL:-host.docker.internal}:11434"
+      - "VECTOR_STORE_URL=http://${HOST_INTERNAL:-host.docker.internal}:6333"
+    restart: "unless-stopped"
+    volumes:
+      - "open-webui:/app/backend/data"
+  pipelines:
+    container_name: "pipelines"
+    image: "ghcr.io/open-webui/pipelines:main"
+    depends_on:
+      - open-webui
+    ports:
+      - "9099:9099/tcp"
+    environment:
+      - "PIPELINES_REQUIREMENTS_PATH=pipelines/aireview/requirements.txt"
+      - "COLUMNS=160"
+    stdin_open: true
+    tty: true
+    volumes:
+      - "./data:/app/data"
+      - "./pipelines:/app/pipelines"
+  qdrant:
+    container_name: "qdrant"
+    image: "qdrant/qdrant"
+    ports:
+      - "6333:6333/tcp"
+      - "6334:6334/tcp"
+    volumes:
+      - "qdrant_storage:/qdrant/storage:z"
+
+volumes:
+  open-webui: {}
+  qdrant_storage: {}
