@@ -1,0 +1,9 @@
+rich
+python-dotenv
+qdrant_client
+langchain-qdrant
+langchain
+langchain-community
+langchain-ollama
+langgraph
+langfuse
